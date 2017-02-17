@@ -47,6 +47,15 @@ RAFMeter = function () {
   };
 
 
+  var insertFirst = function(parent, newChild) {
+    if (parent.firstChild) {
+      parent.insertBefore(newChild, parent.firstChild);
+    } else {
+      parent.appendChild(newChild);
+    }
+  };
+
+
   var tryCreateDisplayNode = function() {
     var target = document.body, displayNode;
     if (target) {
@@ -56,7 +65,7 @@ RAFMeter = function () {
         para.className = 'fpsMeter';
         para.appendChild(displayNode);
 
-        target.appendChild(para);
+        insertFirst(target, para);
     }
     return displayNode;
   };
@@ -65,5 +74,8 @@ RAFMeter = function () {
   requestAnimationFrame(tick);
 }
 
-
-window.rafMeter = new RAFMeter();
+if (module) {
+  module.exports = RAFMeter;
+} else {
+  window.rafMeter = new RAFMeter();
+}

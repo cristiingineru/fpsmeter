@@ -1,0 +1,23 @@
+{
+  "name": "rafmeter",
+  "version": "0.0.1",
+  "description": "Measures the number of request animations per second (fps)",
+  "main": "rafmeter.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cristiingineru/rafmeter.git"
+  },
+  "keywords": [
+    "raf",
+    "fps"
+  ],
+  "author": "Cristi Ingineru",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cristiingineru/rafmeter/issues"
+  },
+  "homepage": "https://github.com/cristiingineru/rafmeter#readme"
+}
