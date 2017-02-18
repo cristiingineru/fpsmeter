@@ -11,39 +11,68 @@
   position: relative;
   background: yellow;
 }
-#myAnimation {
+.myAnimation {
   width: 50px;
   height: 50px;
   position: absolute;
+  border-style: solid;
+  border-color: blue;
   background-color: red;
 }
 </style>
 <body>
 
 <p>
-<button onclick="myMove()">Click Me</button>
+<a>Rectangles in cloud:  </a>
+<select id="objectCount" onchange="selectObjectCount()">
+  <option value="100">100</option>
+  <option value="1000">1000</option>
+  <option value="10000">10000</option>
+</select>
 </p>
 
-<div id ="myContainer">
-<div id ="myAnimation"></div>
-</div>
+<div id="myContainer" />
 
 <script>
-function myMove() {
-  var elem = document.getElementById("myAnimation");
+
+var animationId;
+
+function startAnimation() {
+  var elems = document.getElementsByClassName("myAnimation");
   var pos = 0;
   var increment = +1;
-  var id = setInterval(frame, 10);
+  if (animationId) {
+    clearInterval(animationId);
+  }
+  animationId = setInterval(frame, 10);
   function frame() {
     if ((pos <= 0 && increment < 0) || (pos >= 350 && increment > 0)) {
       increment *= -1;
-    }else {
+    } else {
       pos += increment;
-      elem.style.top = pos + 'px';
-      elem.style.left = pos + 'px';
+      for(var i = 0; i < elems.length; i++) {
+        elems[i].style.top = pos + 25 * Math.random() + 'px';
+        elems[i].style.left = pos + 25 * Math.random() + 'px';
+      }
     }
   }
 }
+
+function selectObjectCount() {
+  var count = document.getElementById("objectCount").value,
+      container = document.getElementById("myContainer");
+  while (container.firstChild) {
+    container.removeChild(container.firstChild);
+  }
+  for(var i = 0; i < count; i++) {
+    var newAnimationObject = document.createElement('div');
+    newAnimationObject.className = 'myAnimation';
+    container.appendChild(newAnimationObject);
+  }
+  startAnimation();
+}
+
+selectObjectCount();
 
 </script>
 

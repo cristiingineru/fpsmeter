@@ -74,7 +74,7 @@ RAFMeter = function () {
   requestAnimationFrame(tick);
 }
 
-if (module) {
+if (typeof exports !== 'undefined' && module.exports) {
   module.exports = RAFMeter;
 } else {
   window.rafMeter = new RAFMeter();
