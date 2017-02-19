@@ -1,5 +1,5 @@
 # About
-A minimally invasive fps meter.
+A minimally invasive raf/fps meter.
 
 
 # How it works
