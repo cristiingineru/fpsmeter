@@ -62,7 +62,7 @@ RAFMeter = function () {
         displayNode = document.createTextNode('x fps');
 
         var para = document.createElement('p');
-        para.className = 'fpsMeter';
+        para.className = 'rafMeter';
         para.appendChild(displayNode);
 
         insertFirst(target, para);
