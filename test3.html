@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<!--https://www.w3schools.com/howto/howto_js_animate.asp-->
+<html>
+<head>
+  <script type="text/javascript" src="rafmeter.js" ></script>
+</head>
+<style>
+#myContainer {
+  width: 400px;
+  height: 400px;
+  position: relative;
+  background: yellow;
+}
+.myAnimation {
+  width: 50px;
+  height: 50px;
+  position: absolute;
+  border-style: solid;
+  border-color: blue;
+  background-color: red;
+}
+</style>
+<body>
+
+<h1>Test 3</h1>
+<p>
+The coordinates of the rectangles are incremented using a timer once every 10 ms, but the actual update of the visual elements is sheduled with a requestAnimationFrame once every 2 increments only.
+This trick of skipping some updates is usefull for example to keep the CPU free for other tasks or to group more updates comming from multiple timers or external events.
+</p>
+
+<p>
+<a>Rectangles in cloud:  </a>
+<select id="objectCount" onchange="selectObjectCount()">
+  <option value="100">100</option>
+  <option value="1000">1000</option>
+  <option value="10000">10000</option>
+</select>
+</p>
+
+<div id="myContainer" />
+
+<script>
+
+var animationId, coords;
+
+function startAnimation() {
+  var elems = document.getElementsByClassName("myAnimation");
+  var pos = 0;
+  var increment = +1;
+  if (animationId) {
+    clearInterval(animationId);
+  }
+  animationId = setInterval(step, 10);
+  function step() {
+    if ((pos <= 0 && increment < 0) || (pos >= 350 && increment > 0)) {
+      increment *= -1;
+    } else {
+      pos += increment;
+      for(var i = 0; i < elems.length; i++) {
+        coords[i].top = pos + 25 * Math.random();
+        coords[i].left = pos + 25 * Math.random();
+      }
+    }
+    if(pos % 2 === 0) {
+      requestAnimationFrame(frame);
+    }
+  }
+}
+
+function frame() {
+  var elems = document.getElementsByClassName("myAnimation");
+  for(var i = 0; i < elems.length; i++) {
+    elems[i].style.top = coords[i].top + 'px';
+    elems[i].style.left = coords[i].left + 'px';
+  }
+}
+
+function selectObjectCount() {
+  var count = document.getElementById("objectCount").value,
+      container = document.getElementById("myContainer");
+  while (container.firstChild) {
+    container.removeChild(container.firstChild);
+  }
+  coords = [];
+  for(var i = 0; i < count; i++) {
+    var newAnimationObject = document.createElement('div');
+    newAnimationObject.className = 'myAnimation';
+    container.appendChild(newAnimationObject);
+    coords.push({top: 0, left: 0});
+  }
+  startAnimation();
+}
+
+selectObjectCount();
+
+</script>
+
+</body>
+</html>
