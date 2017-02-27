@@ -37,10 +37,10 @@ RAFMeter = function () {
   var display = function(durations, rafCallCounts) {
     var duration = durations.reduce(sum, 0),
         meanDuration = duration / durations.length,
-        fps = (1000 / meanDuration).toFixed(1),
-        rafWithCalls = rafCallCounts.reduce(function(total, count){return total+count;}, 0),
-        rafCallsPerSec = (1000 * rafWithCalls / duration).toFixed(1),
-        message = fps + ' fps, ' + rafCallsPerSec + ' raf/sec',
+        meterRafCallsPerSec = (1000 / meanDuration).toFixed(1),
+        appRafCalls = rafCallCounts.reduce(function(total, count){return total+count;}, 0),
+        appRafCallsPerSec = (1000 * appRafCalls / duration).toFixed(1),
+        message = 'application raf calls / sec: ' + appRafCallsPerSec + ', meter raf calls / sec: ' + meterRafCallsPerSec,
         elapsedTimeSinceLastDisplay = curentTime - previousDisplayTime;
     if (!displayNode) {
       displayNode = tryCreateDisplayNode();
