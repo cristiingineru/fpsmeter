@@ -9,7 +9,8 @@ RAFMeter = function () {
       maxHistoryCount = 20,
       durations = [],
       rafCallCounts = [0],
-      displayInterval = 500,
+      mozPaintCounts = [],
+      displayInterval = 1000,
       originalRequestAnimationFrame = requestAnimationFrame;
 
 
@@ -18,13 +19,14 @@ RAFMeter = function () {
 
     if (durations.length === maxHistoryCount) {
       durations.shift();
+      mozPaintCounts.shift();
     }
     durations.push(curentTime - previousTime);
+    mozPaintCounts.push(window.mozPaintCount);
 
     display(durations, rafCallCounts);
 
-    if (durations.length === maxHistoryCount) {
-      durations.shift();
+    if (rafCallCounts.length === maxHistoryCount) {
       rafCallCounts.shift();
     }
     rafCallCounts.push(0);
@@ -40,13 +42,17 @@ RAFMeter = function () {
         meterRafCallsPerSec = (1000 / meanDuration).toFixed(1),
         appRafCalls = rafCallCounts.reduce(function(total, count){return total+count;}, 0),
         appRafCallsPerSec = (1000 * appRafCalls / duration).toFixed(1),
-        message = 'application raf calls / sec: ' + appRafCallsPerSec + ', meter raf calls / sec: ' + meterRafCallsPerSec,
+        mozFrames = mozPaintCounts[mozPaintCounts.length - 1] - mozPaintCounts[0],
+        browserFps = (1000 * mozFrames / duration).toFixed(1);
+        message = 'spied raf calls / sec: ' + appRafCallsPerSec + '<br />' +
+                  'meter raf calls / sec: ' + meterRafCallsPerSec + '<br />' +
+                  'browser frames / sec: ' + browserFps,
         elapsedTimeSinceLastDisplay = curentTime - previousDisplayTime;
     if (!displayNode) {
       displayNode = tryCreateDisplayNode();
     }
     if (displayNode && (elapsedTimeSinceLastDisplay > displayInterval)) {
-      displayNode.nodeValue = message;
+      displayNode.innerHTML = message;
       previousDisplayTime = curentTime;
     }
   };
@@ -69,13 +75,10 @@ RAFMeter = function () {
   var tryCreateDisplayNode = function() {
     var target = document.body, displayNode;
     if (target) {
-        displayNode = document.createTextNode('raf meter is gathering data...');
+        displayNode = document.createElement('div');
+        displayNode.className = 'rafMeter';
 
-        var para = document.createElement('p');
-        para.className = 'rafMeter';
-        para.appendChild(displayNode);
-
-        insertFirst(target, para);
+        insertFirst(target, displayNode);
     }
     return displayNode;
   };
@@ -90,6 +93,7 @@ RAFMeter = function () {
   requestAnimationFrame(tick);
   requestAnimationFrame = fakeRequestAnimationFrame;
 }
+
 
 if (typeof exports !== 'undefined' && module.exports) {
   module.exports = RAFMeter;
