@@ -14,8 +14,10 @@ Just add this line to the page:
 <script type="text/javascript" src="rafmeter.js" ></script>
 ```
 
-# Example
-https://rawgit.com/cristiingineru/rafmeter/master/test.html
+# Examples
+https://rawgit.com/cristiingineru/rafmeter/master/test1.html
+https://rawgit.com/cristiingineru/rafmeter/master/test2.html
+https://rawgit.com/cristiingineru/rafmeter/master/test3.html
 
 
 # Impact on performance

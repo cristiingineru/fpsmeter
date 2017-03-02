@@ -2,64 +2,62 @@
 
 RAFMeter = function () {
 
-  var displayNode,
-      curentTime,
+  var meterRafOnOffButton, displayNode, curentTime, curentMozPaintCount,
       previousTime = Date.now(),
-      previousDisplayTime = 0,
-      maxHistoryCount = 20,
-      durations = [],
-      rafCallCounts = [0],
-      mozPaintCounts = [],
+      previousMozPaintCount = window.mozPaintCount,
+      appRafCallCount = 0,
+      meterRafCallCount = 0,
+      keepRunningMeterRaf = false,
       displayInterval = 1000,
       originalRequestAnimationFrame = requestAnimationFrame;
 
 
-  var tick = function() {
+  var tickInterval = function() {
     curentTime = Date.now();
+    curentMozPaintCount = window.mozPaintCount;
 
-    if (durations.length === maxHistoryCount) {
-      durations.shift();
-      mozPaintCounts.shift();
-    }
-    durations.push(curentTime - previousTime);
-    mozPaintCounts.push(window.mozPaintCount);
-
-    display(durations, rafCallCounts);
-
-    if (rafCallCounts.length === maxHistoryCount) {
-      rafCallCounts.shift();
-    }
-    rafCallCounts.push(0);
+    display();
 
     previousTime = curentTime;
-    originalRequestAnimationFrame(tick);
+    previousMozPaintCount = curentMozPaintCount;
+    appRafCallCount = 0;
+    meterRafCallCount = 0;
   };
 
 
-  var display = function(durations, rafCallCounts) {
-    var duration = durations.reduce(sum, 0),
-        meanDuration = duration / durations.length,
-        meterRafCallsPerSec = (1000 / meanDuration).toFixed(1),
-        appRafCalls = rafCallCounts.reduce(function(total, count){return total+count;}, 0),
-        appRafCallsPerSec = (1000 * appRafCalls / duration).toFixed(1),
-        mozFrames = mozPaintCounts[mozPaintCounts.length - 1] - mozPaintCounts[0],
-        browserFps = (1000 * mozFrames / duration).toFixed(1);
+  var tickRequestAnimationFrame = function() {
+    meterRafCallCount += 1;
+    if (keepRunningMeterRaf) {
+        originalRequestAnimationFrame(tickRequestAnimationFrame);
+    }
+  };
+
+
+  var display = function() {
+    var duration = curentTime - previousTime,
+        appRafCallsPerSec = (1000 * appRafCallCount / duration).toFixed(1),
+        meterRafCallsPerSec = keepRunningMeterRaf ? (1000 * meterRafCallCount / duration).toFixed(1) : NaN,
+        mozFps = 1000 * (curentMozPaintCount - previousMozPaintCount) / duration,
+        browserFps = mozFps.toFixed(1);
         message = 'spied raf calls / sec: ' + appRafCallsPerSec + '<br />' +
                   'meter raf calls / sec: ' + meterRafCallsPerSec + '<br />' +
-                  'browser frames / sec: ' + browserFps,
-        elapsedTimeSinceLastDisplay = curentTime - previousDisplayTime;
+                  'browser frames / sec: ' + browserFps;
     if (!displayNode) {
       displayNode = tryCreateDisplayNode();
     }
-    if (displayNode && (elapsedTimeSinceLastDisplay > displayInterval)) {
+    if (displayNode) {
       displayNode.innerHTML = message;
-      previousDisplayTime = curentTime;
     }
   };
 
 
-  var sum = function(a, b) {
-    return a + b;
+  var toggleMeterRaf = function() {
+    if(meterRafOnOffButton.checked) {
+        keepRunningMeterRaf = true;
+        originalRequestAnimationFrame(tickRequestAnimationFrame);
+    } else {
+        keepRunningMeterRaf = false;
+    }
   };
 
 
@@ -75,22 +73,38 @@ RAFMeter = function () {
   var tryCreateDisplayNode = function() {
     var target = document.body, displayNode;
     if (target) {
+        var view = document.createElement('div');
+        view.className = 'rafMeter';
+
+        meterRafOnOffButton = document.createElement('input');
+        meterRafOnOffButton.type = 'checkbox';
+        meterRafOnOffButton.className = 'rafMeter';
+        meterRafOnOffButton.onclick = toggleMeterRaf;
+
+        var label = document.createElement('label');
+        label.className = 'rafMeter';
+        label.innerHTML = 'schedule meter requestAnimationFrame';
+
         displayNode = document.createElement('div');
         displayNode.className = 'rafMeter';
 
-        insertFirst(target, displayNode);
+        view.appendChild(meterRafOnOffButton);
+        view.appendChild(label);
+        view.appendChild(displayNode);
+
+        insertFirst(target, view);
     }
     return displayNode;
   };
 
 
   var fakeRequestAnimationFrame = function(fn) {
-    rafCallCounts[rafCallCounts.length - 1] += 1;
+    appRafCallCount += 1;
     originalRequestAnimationFrame(fn);
   };
 
 
-  requestAnimationFrame(tick);
+  setInterval(tickInterval, displayInterval);
   requestAnimationFrame = fakeRequestAnimationFrame;
 }
 
